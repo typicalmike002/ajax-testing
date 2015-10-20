@@ -6,11 +6,14 @@
 
 	app.navEvent = function(container) {
 		var nav_links = document.querySelector('.' + container).querySelectorAll('a');
-		for (var i = 0; i < nav_links.length; i++){
-			var anchor = nav_links[i];
+		var nav_length = nav_links.length;
+		var anchor = [];
+		for (var i = 0; i < nav_length; i++){
+			anchor = nav_links[i];
 			anchor.addEventListener('click', function(event) {
 				event.preventDefault();
-				app.ajaxCall(this.getAttribute('href'));
+				var request = this.getAttribute('href');
+				app.ajaxCall(request);
 			});
 		}
 	}
