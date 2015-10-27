@@ -4,24 +4,9 @@
 
 	var app = {};
 
-	app.navEvent = function(container) {
-		var nav_links = document.querySelector('.' + container).querySelectorAll('a');
-		var nav_length = nav_links.length;
-		var anchor = [];
-		for (var i = 0; i < nav_length; i++){
-			anchor = nav_links[i];
-			anchor.addEventListener('click', function(event) {
-				event.preventDefault();	
-				var request = this.getAttribute('href');
-				app.ajaxCall(request);
-				app.pushHistory(request);
-			}, false);
-			
-		}
-	}
-
 	app.ajaxCall = function(request) {
 		var xhr = new XMLHttpRequest();
+		if (request === '') { request = 'home'; } //For when back is used and previous page is the index.
 		xhr.open('GET', 'templates/' + encodeURI(request) + '.html', true);
 		xhr.setRequestHeader('Content-Type', 'text/html');
 		xhr.send();
@@ -45,16 +30,28 @@
 		history.pushState(stateObj, '', request);
 	}
 
-	app.controlEvent = function() {
+	(function() {
+		//IIFE: Hooks ajax calls into links inside div class nav.
+		var nav_links = document.getElementsByClassName('.nav').getElementByTagName('a');
+		var nav_length = nav_links.length;
+		var anchor = [];
+		for (var i = 0; i < nav_length; i++){
+			anchor = nav_links[i];
+			anchor.addEventListener('click', function(event) {
+				event.preventDefault();	
+				var request = this.getAttribute('href');
+				app.ajaxCall(request);
+				app.pushHistory(request);
+			}, false);		
+		}
+	}());
+
+	(function() {
+		//IIFE: Will enable the back and forward buttons on browsers.
 		window.addEventListener('popstate', function() {
 			var endUrl = window.location.pathname.split('/').pop();
 			app.ajaxCall(endUrl);
 		}, false);
-	}
+	}());
 
-	app.navEvent('nav'); //hooks ajax calls to 'a' tags inside 'nav'
-	app.controlEvent(); //enables back/foward
-
-	return app;
-
-})(window, document);
+}(window, document));
