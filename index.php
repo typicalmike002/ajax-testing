@@ -28,7 +28,7 @@ $title = ucfirst($content);
 					This is a website header.
 				</h1>
 				<nav role="navigation">
-					<div class="nav">
+					<div id="nav">
 						<a href="home" class="nav_link">Home</a>
 						<a href="about" class="nav_link">About</a>
 						<a href="articles" class="nav_link">Articles</a>
@@ -37,7 +37,7 @@ $title = ucfirst($content);
 				</nav>
 			</header>
 			<main role="main">
-				<div class="content">
+				<div id="content">
 					<?php include("templates/$content.html"); ?>
 				</div>
 			</main>
@@ -47,6 +47,5 @@ $title = ucfirst($content);
 				</div>
 			</footer>
 		</div>
-	<!-- load javascript -->
-	<script src="js/javascript.js"></script>
+		<script src="js/javascript.js"></script>
 	</body>
