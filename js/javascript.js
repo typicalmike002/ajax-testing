@@ -2,96 +2,149 @@
 
 	'use strict';
 
-	var ajaxCall = {
-		xhrObject: function(){
-			if (window.XMLHttpRequest) {
-				return new XMLHttpRequest();
-			} else if (window.ActiveXObject) {
-				// used for old ie browsers
-				return new ActiveXObject('MSXML2.XMLHTTP.3.0');
-			} else {
-				console.log('error processing XMLHttpRequest');
-			}
-		},
+	var options = {
+
+	// The options object is used for swamping enviorments easily.
+
 		homePage: 'home',
-		folderName: 'templates/',
-		fileFormat: 'html',
+		folder: 'templates/',
+		fileType: 'html',
 		method: 'GET',
 		contentType: 'text/html',
 		isAsync: true,
 		containers: {
-			contentDiv: document.querySelector('.content'),
-			navigation: document.querySelectorAll('.nav_link')
+			content: 'content',
+			navigation: 'nav'
 		}
 	};
 
-	ajaxCall.makeRequest = function (url) {
-		var xhr = this.xhrObject();
-		xhr.open(this.method, this.folderName + encodeURI(url) + '.' + this.fileFormat, this.isAsync);
-		xhr.setRequestHeader('Content-Type', this.contentType);
-		xhr.send();
-		xhr.onload = function() {
-			if (xhr.status === 200) {
-				ajaxCall.loadContent(xhr.responseText);
-			}
-			else {
-				console.log('error loading xhr object');
+
+	var xhrObject = {
+
+	// Returns the proper XMLHttpRequest Object based on browser.
+	
+		requestType: function () {
+			
+			if (window.XMLHttpRequest) { //Mozilla, Safari, IE7+, Chrome
+
+				return new XMLHttpRequest();
+
+			} else if (window.ActiveXObject) { //IE 6 and older
+
+				return new ActiveXObject('Microsoft.XMLHTTP');
 			}
 		}
 	};
 
-	ajaxCall.loadContent = function (content) {
-		var container = this.containers.contentDiv;
-		container.innerHTML = content;
+
+	var Request = function () { 
+
+	//Constructor for new Requests.
+	//this was done so the script wont have to keep
+	//reloading these on each request.
+
+		this.o = options;
+		this.httpRequest = xhrObject.requestType();
+		this.wrapper = document.getElementById(this.o.containers.content);
 	}
 
+
+	var ajax = new Request();
+
+
+	ajax.makeRequest = function (url) { 
+
+	// 1. Makes a request based on the values loaded into the Request object.
+	// 2. The Method, content type, async boolean, file format, and folder are all set inside the options object.
+	// 3. When the status return 200, the content of the request will be placed inside the 'content' container
+	// 		that is set inside the options object.
+	
+		
+		var xhr = this.httpRequest,
+			injectDiv = this.wrapper;
+
+		if (url === '') { 
+
+			//When pressing back and the last page visited was the index,
+			//set the url to the homePage value found in the options object. 
+					
+			url = this.o.homePage;
+
+		} 
+
+		xhr.onreadystatechange = function () {
+
+			if (xhr.readyState === XMLHttpRequest.DONE) {
+
+				if (xhr.status === 200) { //injects the response into the content div when successful
+
+					injectDiv.innerHTML = xhr.responseText; 
+
+				} else { //Still waiting for response.
+
+				}
+			}
+		}
+
+		xhr.open(this.o.method, this.o.folder + encodeURI(url) + '.' + this.o.fileType, this.o.isAsync);
+		xhr.setRequestHeader('Content-Type', this.o.contentType);
+		xhr.send(null);
+	}
+
+
 	function pushState(url) {
-		// ie9 does not support pushState.
+
+	// Pushes the url into the address bar.
+			
 		if (window.history.pushState) {
 			var state = { page: url }
 			history.pushState(state, '', url);
 		}
 	}
 
-	ajaxCall.hookLinks = function () {
-		var nav_links = this.containers.navigation;
-		var nav_length = nav_links.length;
-		var anchor = [];
-		for (var i = 0; i < nav_length; i++){
-			anchor = nav_links[i];
-			if (window.addEventListener) {
+
+	function navigationControls() {
+	
+	// 1. Removes default link behavior from links inside the navigation container set in the options object.
+	// 2. Each link gets its own event that will trigger a New Request.
+	// 3. The request is based off of the link's 'href' value which must be set inside the markup.
+
+		var wrapper = document.getElementById(options.containers.navigation),
+			links = wrapper.getElementsByTagName('a'),
+			linksLength = links.length,
+			anchor = [];
+
+		for (var i = 0; i < linksLength; i++) { 
+
+			anchor = links[i];
+
+			if (window.onpopstate) {
+
 				anchor.addEventListener('click', function(event) {
 					event.preventDefault();
 					var url = this.getAttribute('href');
+					ajax.makeRequest(url);
 					pushState(url);
-					ajaxCall.makeRequest(url);
+
 				}, false);
-			} else {
-				// ie10 and below
-				anchor.attachEvent('click', function(event) {
-					event.returnValue = false;
-					var url = this.getAttribute('href');
-					pushState(url);
-					ajaxCall.makeRequest(url);
-				});
-			}
+			
+			} 
 		}
 	}
 
-	//event that triggers ajaxCall when user navigates with the back/forward buttons.
-	if (window.addEventListener) {
+
+	if (window.onpopstate) {
+
+	// Listens for navigation events like back/foward.
+	// When triggered, it will make a new ajax request.
 		window.addEventListener('popstate', function() {
 			var url = window.location.pathname.split('/').pop();
-			ajaxCall.makeRequest(url);
+			ajax.makeRequest(url);
 		}, false);
-	} else {
-		// ie10 and below
-		window.attachEvent('popstate', function() {
-			var url = window.location.pathname.split('/').pop();
-			ajaxCall.makeRequest(url);
-		}
+
 	}
 
-	ajaxCall.hookLinks();
+	navigationControls();
+
 
 }(window, document));
