@@ -118,7 +118,7 @@
 
 			anchor = links[i];
 
-			if (window.onpopstate) {
+			if (window.addEventListener) {
 
 				anchor.addEventListener('click', function(event) {
 					event.preventDefault();
@@ -133,7 +133,7 @@
 	}
 
 
-	if (window.onpopstate) {
+	if (window.addEventListener) {
 
 	// Listens for navigation events like back/foward.
 	// When triggered, it will make a new ajax request.
