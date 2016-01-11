@@ -1,13 +1,10 @@
 # ajax-testing
-======
 Ajax pages that degrade nicely when javascript is disabled and work well with the back/foward buttons.
 
 ## about this repo
-------
 I wanted to teach myself some more ajax techniques without relying on the jQuery library so I created this.  Basically, it creates a single page application that requests pages from inside a template folder that will still work with javascript disabled and will still be indexed by google because it does not rely on the '#' in the url.  
 
 ## How it works
-------
 The javascript looks into your markup for two div IDs.  One is known as 'content' by default, and the other is 'nav' by default.  These both must be IDs and not classes.  You may change their values in the options located in the js/javascript.js file at the top (more below).
 
 The 'navigation' container div will attach an event to all 'a' tag children it finds.  Each 'href' value has to match a file found inside the template folder (excluding the filetype after the dot).  The filetype is set inside the options object (see below).
@@ -19,7 +16,6 @@ I used php to make a simple example of how to use this file.  To check it out, r
 >git clone https://github.com/typicalmike002/ajax-testing.git
 
 ## options object
-------
 Found in the js/javascript.js file at the top.  Set these values to fit your needs. 
 
 ```javascript
